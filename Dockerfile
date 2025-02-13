@@ -23,39 +23,6 @@ RUN dpkg --add-architecture amd64 \
     && rm libssl1.1_1.1.1f-1ubuntu2_i386.deb \
     && rm -rf /var/lib/apt/lists/*
 
-ENV HOMEDIR="/home/steam" \
-    STEAMAPPID="232250" \
-    STEAMAPPDIR="/home/steam/tf2-server"
-
-
-COPY etc/entry.sh ${HOMEDIR}/entry.sh
-
-WORKDIR ${STEAMAPPDIR}
-
-RUN chmod +x "${HOMEDIR}/entry.sh" \
-    && chown -R "${USER}":"${USER}" "${HOMEDIR}/entry.sh" ${STEAMAPPDIR}
-
-FROM build_stage AS bookworm-root
-
-ENV TF2_ARGS=""\
-    TF2_CLIENTPORT="27005" \
-    TF2_IP="" \
-    CSS_LAN="0" \
-    TF2_MAP="ctf_2fort" \
-    TF2_MAXPLAYERS="12" \
-    TF2_PORT="27015" \
-    TF2_SOURCETVPORT="27020" \
-    TF2_TICKRATE=""
-
-EXPOSE ${TF2_CLIENTPORT}/udp \
-    ${TF2_PORT}/tcp \
-    ${TF2_PORT}/udp \
-    ${TF2_SOURCETVPORT}/udp
-
-USER ${USER}
-WORKDIR ${HOMEDIR}
-
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD netstat -l | grep "${TF2_PORT}.*LISTEN"
-
-CMD ["bash", "entry.sh"]
+USER        container
+ENV         USER=container HOME=/home/container
+WORKDIR     /home/container
